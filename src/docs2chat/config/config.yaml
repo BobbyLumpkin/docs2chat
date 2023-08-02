@@ -1,0 +1,24 @@
+## General Paths
+BASE_PATH: &BASE_PATH /home/ubuntu/projects/docs2chat
+DOCUMENTS_DIR: &DOCUMENTS_DIR
+  !osjoin
+    - *BASE_PATH
+    - documents
+MODELS_DIR: &MODELS_DIR
+  !osjoin
+    - *BASE_PATH
+    - models
+
+## Models
+MODEL_DIR: &MODEL_DIR
+  !osjoin
+    - *MODELS_DIR
+    - Llama-2-7B-Chat-GGML
+MODEL_PATH: &MODEL_PATH
+  !osjoin
+    - *MODEL_DIR
+    - llama-2-7b-chat.ggmlv3.q4_0.bin
+EMBEDDING_DIR: &EMBEDDING
+  !osjoin
+    - *MODELS_DIR
+    - instructor-xl
