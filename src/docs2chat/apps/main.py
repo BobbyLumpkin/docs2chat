@@ -41,12 +41,6 @@ def main():
     )
 
     args = parser.parse_args()
-    
-    print(
-        "-----------------------------------------"
-        "\n----------Welcome To Docs2Chat----------\n"
-        "-----------------------------------------"
-    )
 
     if args.type == "cli":
         run_cli_application(

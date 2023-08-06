@@ -27,6 +27,19 @@ _console_handler.setFormatter(_formatter)
 _logger.addHandler(_console_handler)
 
 
+COLOR_RESET = "\033[0m"
+GREEN = "\033[32m"
+BANNER = f"""
+{GREEN}
+    ____  ____  ______________   ________  _____  ______
+   / __ \/ __ \/ ____/ ___/__ \ / ____/ / / /   |/_  __/
+  / / / / / / / /    \__ \__/ // /   / /_/ / /| | / /   
+ / /_/ / /_/ / /___ ___/ / __// /___/ __  / ___ |/ /    
+/_____/\____/\____//____/____/\____/_/ /_/_/  |_/_/     
+                                                                     
+"""
+
+
 def run_cli_application(
     docs_dir: str = None,
     config_yaml: str = None,
@@ -35,6 +48,9 @@ def run_cli_application(
         docs_dir = config.DOCUMENTS_DIR
     if config_yaml is not None:
         config.reset_config(config_yaml)
+    
+    print(BANNER, COLOR_RESET)
+
     _logger.info(
         "Generating text splitter."
     )
