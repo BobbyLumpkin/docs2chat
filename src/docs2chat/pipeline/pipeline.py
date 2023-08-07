@@ -5,17 +5,21 @@ Langchain LLM pipeline for generative QA pipeline.
 
 from dataclasses import dataclass, field, InitVar
 from langchain.chains import ConversationalRetrievalChain
-from langchain.docstore.document import Document
-from langchain.document_loaders import DirectoryLoader
 from langchain.embeddings import HuggingFaceInstructEmbeddings
 from langchain.llms import LlamaCpp
 from langchain.memory import ConversationBufferMemory
-from langchain.text_splitter import CharacterTextSplitter
-from langchain.vectorstores import FAISS
 import logging
 from pathlib import Path
-from tqdm import tqdm
 from typing import Iterable, Optional, Union
+
+
+from docs2chat.config import config
+from docs2chat.pipeline.utils import (
+    load_and_split_from_dir,
+    load_and_split_from_str,
+    _EmbeddingsProtocol,
+    _TextSplitterProtocol
+)
 
 
 _logger = logging.getLogger(__name__)
@@ -28,65 +32,6 @@ _console_handler.setFormatter(_formatter)
 _logger.addHandler(_console_handler)
 
 
-def load_and_split_from_str(
-    content: list[str],
-    text_splitter,
-    show_progress: bool = True
-):
-    """
-    Load and split str into document objects.
-    """
-    if isinstance(content, str):
-        content = [content]
-    if isinstance(content, list):
-        chunks_list = [
-            text_splitter.split_text(ele)
-            for ele in content
-        ]
-        if show_progress:
-            return [
-                Document(page_content=chunk, metadata={"source": "memory"})
-                for chunks in tqdm(chunks_list)
-                for chunk in chunks
-            ]
-        else:
-            return [
-                Document(page_content=chunk, metadata={"source": "memory"})
-                for chunks in chunks_list
-                for chunk in chunks
-            ]
-    else:
-        raise TypeError("`content` must be one of `str` or `list[str]`.")
-
-
-def load_and_split_from_dir(
-    content: str,
-    text_splitter,
-    show_progress: bool = True
-):
-    """
-    Load and split files in directory into document objects.
-    """
-    loader = DirectoryLoader(str(content), show_progress=True)
-    return loader.load_and_split(text_splitter)
-
-
-def create_vectorstore(
-    docs,
-    embeddings
-):
-    """
-    Create a FAISS vectorstore 
-    """
-    return FAISS.from_documents(documents=docs, embedding=embeddings)
-
-
-LOADER_FACTORY = {
-    "text": load_and_split_from_str,
-    "dir": load_and_split_from_dir
-}
-
-
 @dataclass
 class PreProcessor:
 
@@ -97,7 +42,20 @@ class PreProcessor:
     
     content: Union[str, list[str]] = field()
     docs: Optional[list] = field(default=None)
+    embeddings: Optional[_EmbeddingsProtocol] = field(
+        default=HuggingFaceInstructEmbeddings(
+            model_name=config.EMBEDDING_DIR
+        )
+    )
     load_from_type: str = field(default="dir")
+    text_splitter: Optional[_TextSplitterProtocol] = field(
+        default=CharacterTextSplitter(        
+            separator="\n",
+            chunk_size=1000,
+            chunk_overlap=200,
+            length_function=len,
+        )
+    )
     
     def __post_init__(self):
         if self.load_from_type not in ["text", "dir"]:
@@ -106,7 +64,7 @@ class PreProcessor:
             )
     
     def load_and_split(self, text_splitter, show_progress=True, store=False):
-        load_func = self.LOADER_FACTORY[self.load_from_type]
+        load_func = PreProcessor.LOADER_FACTORY[self.load_from_type]
         docs = load_func(
             content=self.content,
             text_splitter=text_splitter,
