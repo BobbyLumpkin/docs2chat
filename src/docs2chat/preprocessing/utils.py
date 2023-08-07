@@ -19,6 +19,21 @@ class _EmbeddingsProtocol(Protocol):
         ...
 
 
+class _MemoryProtocol(Protocol):
+    
+    def save_context():
+        ...
+    
+    def load_memory_variables():
+        ...
+
+
+class _RetrieverProtocol(Protocol):
+
+    def get_relevant_documents():
+        ...
+
+
 class _TextSplitterProtocol(Protocol):
 
     def split_text():

@@ -3,18 +3,19 @@ Purpose: CLI application for docs2chat.
 """
 
 
+import argparse
 from langchain.chains import ConversationalRetrievalChain
-from langchain.embeddings import HuggingFaceInstructEmbeddings
 from langchain.llms import LlamaCpp
 from langchain.memory import ConversationBufferMemory
-from langchain.text_splitter import CharacterTextSplitter
 import logging
+import os
 import readline
 import sys
 
 
+from docs2chat.apps.utils import load_bool, load_none_or_str
 from docs2chat.config import config
-from docs2chat.pipeline import PreProcessor
+from docs2chat.preprocessing import PreProcessor
 
 
 _logger = logging.getLogger(__name__)
@@ -42,39 +43,17 @@ BANNER = f"""
 
 def run_cli_application(
     docs_dir: str = None,
-    config_yaml: str = None,
+    config_yaml: str = None
 ):
     if docs_dir is None:
         docs_dir = config.DOCUMENTS_DIR
     if config_yaml is not None:
         config.reset_config(config_yaml)
-    
-    print(BANNER, COLOR_RESET)
 
-    _logger.info(
-        "Generating text splitter."
-    )
-    text_splitter = CharacterTextSplitter(        
-        separator="\n",
-        chunk_size=1000,
-        chunk_overlap=200,
-        length_function=len,
-    )
-    _logger.info(
-        f"Loading embedding model from {config.EMBEDDING_DIR}."
-    )
-    embeddings = HuggingFaceInstructEmbeddings(
-        model_name=config.EMBEDDING_DIR
-    )
-    _logger.info(
-        "Loading documents into vectorstore. This may take a few minutes ..."
-    )
+    print(BANNER, COLOR_RESET)
+    
     preprocessor = PreProcessor(content=docs_dir)
-    vectorstore = preprocessor.preprocess(
-        text_splitter=text_splitter,
-        embeddings=embeddings,
-        show_progress=False
-    )
+    vectorstore = preprocessor.preprocess(show_progress=False)
     _logger.info(
         f"Loading LLM from {config.MODEL_PATH}."
     )
@@ -93,6 +72,7 @@ def run_cli_application(
         retriever=vectorstore.as_retriever(),
         memory=memory
     )
+
     print("\n----------Enter a Question Below----------\n")
     question = input("User Question: ")
     while question != "quit":
@@ -103,3 +83,31 @@ def run_cli_application(
             "--------------")
         question = input("User Question: ")
     print("Quitting chat. Goodbye!")
+
+
+if __name__ == "__main__":
+    
+    parser = argparse.ArgumentParser(description="Launch docs2chat app.")
+
+    parser.add_argument(
+        "--config_yaml",
+        type=load_none_or_str,
+        help="Absolute path to yaml config file.",
+        default="None",
+        required=False
+    )
+
+    parser.add_argument(
+        "--docs_dir",
+        type=str,
+        help="Full path to directory containing documents.",
+        default=config.DOCUMENTS_DIR,
+        required=False
+    )
+
+    args = parser.parse_args()
+
+    run_cli_application(
+        docs_dir=args.docs_dir,
+        config_yaml=args.config_yaml
+    )

@@ -4,10 +4,17 @@ Purpose: Launch the appropriate version of the application.
 
 
 import argparse
+import os
+from pathlib import Path
+import subprocess
 
 
-from docs2chat.apps.cli import run_cli_application
+from docs2chat.apps.utils import load_bool, load_none_or_str
 from docs2chat.config import config
+
+
+APPS_PATH = Path(os.path.realpath(__file__)).parents[1].absolute() / "apps"
+CLI_SCRIPT_PATH = APPS_PATH / "cli.py"
 
 
 def main():
@@ -33,6 +40,14 @@ def main():
     )
 
     parser.add_argument(
+        "--debug",
+        type=load_bool,
+        help="Whether or not to redirect stderr to 'dev/null'.",
+        default=False,
+        required=False
+    )
+
+    parser.add_argument(
         "--docs_dir",
         type=str,
         help="Full path to directory containing documents.",
@@ -41,18 +56,19 @@ def main():
     )
 
     args = parser.parse_args()
-
+    
     if args.type == "cli":
-        run_cli_application(
-            docs_dir=args.docs_dir,
-            config_yaml=args.config_yaml
-        )
-
-
-def load_none_or_str(value):
-    if value == "None":
-        return None
-    return value
+        run_kwargs = {
+            "args": [
+                "python3",
+                str(CLI_SCRIPT_PATH),
+                f"--docs_dir={args.docs_dir}",
+                f"--config_yaml={args.config_yaml}"
+            ]
+        }
+        if not args.debug:
+            run_kwargs["stderr"] = subprocess.DEVNULL
+        subprocess.run(**run_kwargs)
     
 
 if __name__ == "__main__":
