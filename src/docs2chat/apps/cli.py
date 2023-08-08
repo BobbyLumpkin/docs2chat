@@ -4,9 +4,6 @@ Purpose: CLI application for docs2chat.
 
 
 import argparse
-from langchain.chains import ConversationalRetrievalChain
-from langchain.llms import LlamaCpp
-from langchain.memory import ConversationBufferMemory
 import logging
 import os
 import readline
@@ -15,7 +12,7 @@ import sys
 
 from docs2chat.apps.utils import load_bool, load_none_or_str
 from docs2chat.config import config
-from docs2chat.preprocessing import PreProcessor
+from docs2chat.preprocessing import get_conversation_chain
 
 
 _logger = logging.getLogger(__name__)
@@ -52,34 +49,23 @@ def run_cli_application(
 
     print(BANNER, COLOR_RESET)
     
-    preprocessor = PreProcessor(content=docs_dir)
-    vectorstore = preprocessor.preprocess(show_progress=False)
-    _logger.info(
-        f"Loading LLM from {config.MODEL_PATH}."
-    )
-    memory = ConversationBufferMemory(
-        memory_key="chat_history",
-        return_messages=True
-    )
-    llm = LlamaCpp(
-        model_path=config.MODEL_PATH,
-        n_ctx=2048,
-        input={"temperature": 0.75, "max_length": 2000, "top_p": 1},
-        verbose=False
-    )
-    conversation_chain = ConversationalRetrievalChain.from_llm(
-        llm=llm,
-        retriever=vectorstore.as_retriever(),
-        memory=memory
+    conversation_chain = get_conversation_chain(
+        docs_dir=docs_dir,
+        config_obj=config
     )
 
     print("\n----------Enter a Question Below----------\n")
     question = input("User Question: ")
     while question != "quit":
         response = conversation_chain({"question": question})
+        sources = list({
+            source_doc.metadata["source"]
+            for source_doc in response["source_documents"]
+        })
         print(
             "--------------"
             f"\nAI Answer: {response['answer']}\n"
+            f"\nAI Answer Sources: {sources}\n"
             "--------------")
         question = input("User Question: ")
     print("Quitting chat. Goodbye!")
