@@ -1,5 +1,5 @@
 ## General Paths
-BASE_PATH: &BASE_PATH /home/ubuntu/projects/docs2chat
+BASE_PATH: &BASE_PATH /home/ec2-user/projects/docs2chat
 DOCUMENTS_DIR: &DOCUMENTS_DIR
   !osjoin
     - *BASE_PATH
