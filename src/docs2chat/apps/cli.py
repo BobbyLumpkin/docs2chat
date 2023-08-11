@@ -54,7 +54,7 @@ def run_cli_application(
         config_obj=config
     )
 
-    print("\n----------Enter a Question Below----------\n")
+    print(f"\n----------{GREEN}Enter a Question Below{COLOR_RESET}----------{GREEN}\n")
     question = input("User Question: ")
     while question != "quit":
         response = conversation_chain({"question": question})
@@ -63,10 +63,9 @@ def run_cli_application(
             for source_doc in response["source_documents"]
         })
         print(
-            "--------------"
-            f"\nAI Answer: {response['answer']}\n"
+            f"\nAI Answer: {response['answer']}"
             f"\nAI Answer Sources: {sources}\n"
-            "--------------")
+            f"{COLOR_RESET}--------------{GREEN}")
         question = input("User Question: ")
     print("Quitting chat. Goodbye!")
 
