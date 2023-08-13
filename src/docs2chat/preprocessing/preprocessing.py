@@ -4,10 +4,7 @@ Langchain LLM pipeline for generative QA pipeline.
 
 
 from dataclasses import dataclass, field, InitVar
-from langchain.chains import ConversationalRetrievalChain
 from langchain.embeddings import HuggingFaceInstructEmbeddings
-from langchain.llms import LlamaCpp
-from langchain.memory import ConversationBufferMemory
 from langchain.text_splitter import CharacterTextSplitter
 import logging
 from pathlib import Path
@@ -44,7 +41,7 @@ class PreProcessor:
         "dir": load_and_split_from_dir
     }
     
-    content: Union[str, list[str]] = field()
+    content: Union[str, list[str]] = field(default=config.DOCUMENTS_DIR)
     docs: Optional[list] = field(default=None)
     embeddings: Optional[_EmbeddingsProtocol] = field(default=None)
     load_from_type: str = field(default="dir")
@@ -97,7 +94,8 @@ class PreProcessor:
 
     def preprocess(
         self,
-        show_progress,
+        show_progress: bool = True,
+        return_vectorstore: bool = True,
         store_docs: bool = False,
         store_vectorstore: bool = False
     ):
@@ -112,32 +110,6 @@ class PreProcessor:
             docs=docs,
             store=store_vectorstore
         )
-        return vectorstore
-
-
-def get_conversation_chain(
-    config_obj: Config,
-    docs_dir: str
-) -> ConversationalRetrievalChain:
-    preprocessor = PreProcessor(content=docs_dir)
-    vectorstore = preprocessor.preprocess(show_progress=False)
-    _logger.info(
-        f"Loading LLM from {config_obj.MODEL_PATH}."
-    )
-    memory = ConversationBufferMemory(
-        memory_key="chat_history",
-        return_messages=True,
-        output_key="answer"
-    )
-    llm = LlamaCpp(
-        model_path=config_obj.MODEL_PATH,
-        n_ctx=2048,
-        input={"temperature": 0.75, "max_length": 2000, "top_p": 1},
-        verbose=False
-    )
-    return ConversationalRetrievalChain.from_llm(
-        llm=llm,
-        retriever=vectorstore.as_retriever(),
-        memory=memory, 
-        return_source_documents=True
-    )
+        if return_vectorstore:
+            return vectorstore
+        return

@@ -12,7 +12,7 @@ import sys
 
 from docs2chat.apps.utils import load_bool, load_none_or_str
 from docs2chat.config import config
-from docs2chat.preprocessing import get_conversation_chain
+from docs2chat.chat import get_conversation_chain
 
 
 _logger = logging.getLogger(__name__)
