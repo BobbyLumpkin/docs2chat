@@ -67,7 +67,7 @@ def run_cli_application(
         format_func(response)
         print(f"{COLOR_RESET}--------------{GREEN}")
         question = input("User Question: ")
-    print("Quitting chat. Goodbye!")
+    print(f"Quitting chat. Goodbye!{COLOR_RESET}")
 
 
 if __name__ == "__main__":

@@ -6,6 +6,7 @@ Purpose: Conversational (generative) QA functionality.
 from langchain.chains import ConversationalRetrievalChain
 from langchain.llms import LlamaCpp
 from langchain.memory import ConversationBufferMemory
+from langchain.prompts import PromptTemplate
 import logging
 import sys
 
@@ -22,6 +23,21 @@ _formatter = logging.Formatter(
 _console_handler = logging.StreamHandler(sys.stdout)
 _console_handler.setFormatter(_formatter)
 _logger.addHandler(_console_handler)
+
+
+PROMPT_TEMPLATE = """You are a helpful AI assistant. Use the following pieces of context to answer the question at the end.
+Your answer should be thorough, helpful and accurate.
+If you don't know the answer, just say 'I'm sorry, but I lack the information to assist with this'.
+Do not try to make up an answer.
+
+{context}
+
+Question: {question}
+Answer:"""
+
+PROMPT = PromptTemplate(
+    template=PROMPT_TEMPLATE, input_variables=["context", "question"]
+)
 
 
 def get_conversation_chain(
@@ -48,5 +64,6 @@ def get_conversation_chain(
         llm=llm,
         retriever=vectorstore.as_retriever(),
         memory=memory, 
-        return_source_documents=True
+        return_source_documents=True,
+        combine_docs_chain_kwargs={"prompt": PROMPT}
     )
