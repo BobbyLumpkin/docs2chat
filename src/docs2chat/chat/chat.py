@@ -10,7 +10,7 @@ import logging
 import sys
 
 
-from docs2chat.config import Config
+from docs2chat.config import Config, config
 from docs2chat.preprocessing import PreProcessor
 
 
@@ -25,8 +25,8 @@ _logger.addHandler(_console_handler)
 
 
 def get_conversation_chain(
-    config_obj: Config,
-    docs_dir: str
+    docs_dir: str,
+    config_obj: Config = config,
 ) -> ConversationalRetrievalChain:
     preprocessor = PreProcessor(content=docs_dir)
     vectorstore = preprocessor.preprocess(show_progress=False)

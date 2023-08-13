@@ -55,6 +55,36 @@ def main():
         required=False
     )
 
+    parser.add_argument(
+        "--chain_type",
+        type=str,
+        help=(
+            "What type of QA to perform. "
+            "One of `extractive`, `generative`."),
+        default="generative",
+        required=False
+    )
+
+    parser.add_argument(
+        "--num_return_docs",
+        type=int,
+        help=(
+            "The number of documents to return "
+            "(if `chain_type` is `extractive`)."),
+        default=4,
+        required=False
+    )
+
+    parser.add_argument(
+        "--return_threshold",
+        type=float,
+        help=(
+            "The confidence threshold in [0,1] to use as a cutoff "
+            "(if `chain_type` is `extractive`.)"),
+        default=0,
+        required=False
+    )
+
     args = parser.parse_args()
     
     if args.type == "cli":
@@ -63,7 +93,10 @@ def main():
                 "python3",
                 str(CLI_SCRIPT_PATH),
                 f"--docs_dir={args.docs_dir}",
-                f"--config_yaml={args.config_yaml}"
+                f"--config_yaml={args.config_yaml}",
+                f"--chain_type={args.chain_type}",
+                f"--num_return_docs={args.num_return_docs}",
+                f"--return_threshold={args.return_threshold}"
             ]
         }
         if not args.debug:

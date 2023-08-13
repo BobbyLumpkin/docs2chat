@@ -26,18 +26,18 @@ _logger.addHandler(_console_handler)
 @dataclass
 class ExtractivePipeline:
     
-    preprocessor_kwargs: InitVar[dict] = field(default={})
+    content: InitVar[Optional[str]] = field(default=None)
     preprocessor: Optional[PreProcessor] = field(default=None)
     num_return_docs: int = field(default=4)
     return_threshold: float = field(default=0)
 
-    def __post_init__(self, preprocessor_kwargs):
+    def __post_init__(self, content):
         if self.preprocessor is None:
             _logger.info(
                 "PreProcessor was not passed. "
                 "Initializing a PreProcessor object."
             )
-            preprocessor = PreProcessor(**preprocessor_kwargs)
+            preprocessor = PreProcessor(content=content)
             setattr(self, "preprocessor", preprocessor)
         if not hasattr(self.preprocessor, "vectorstore"):
             _logger.info(
@@ -53,7 +53,7 @@ class ExtractivePipeline:
         return self.run(query=query)
     
     def run(self, query: str) -> tuple[Document, float]:
-        results = extractive_pipeline.preprocessor\
+        results = self.preprocessor\
             .vectorstore.similarity_search_with_score(
                 query=query,
                 k=self.num_return_docs

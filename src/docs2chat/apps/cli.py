@@ -10,7 +10,7 @@ import readline
 import sys
 
 
-from docs2chat.apps.utils import load_bool, load_none_or_str
+from docs2chat.apps.utils import ChainFactory, load_bool, load_none_or_str
 from docs2chat.config import config
 from docs2chat.chat import get_conversation_chain
 
@@ -39,8 +39,11 @@ BANNER = f"""
 
 
 def run_cli_application(
+    chain_type: str = "generative",
+    config_yaml: str = None,
     docs_dir: str = None,
-    config_yaml: str = None
+    num_return_docs: int = None,
+    return_threshold: float = None
 ):
     if docs_dir is None:
         docs_dir = config.DOCUMENTS_DIR
@@ -49,23 +52,20 @@ def run_cli_application(
 
     print(BANNER, COLOR_RESET)
     
-    conversation_chain = get_conversation_chain(
+    chain, format_func = ChainFactory(
+        chain_type=chain_type,
         docs_dir=docs_dir,
-        config_obj=config
+        config_obj=config,
+        num_return_docs=num_return_docs,
+        return_threshold=return_threshold
     )
 
     print(f"\n----------{GREEN}Enter a Question Below{COLOR_RESET}----------{GREEN}\n")
     question = input("User Question: ")
     while question != "quit":
-        response = conversation_chain({"question": question})
-        sources = list({
-            source_doc.metadata["source"]
-            for source_doc in response["source_documents"]
-        })
-        print(
-            f"\nAI Answer: {response['answer']}"
-            f"\nAI Answer Sources: {sources}\n"
-            f"{COLOR_RESET}--------------{GREEN}")
+        response = chain(question)
+        format_func(response)
+        print(f"{COLOR_RESET}--------------{GREEN}")
         question = input("User Question: ")
     print("Quitting chat. Goodbye!")
 
@@ -90,9 +90,42 @@ if __name__ == "__main__":
         required=False
     )
 
+    parser.add_argument(
+        "--chain_type",
+        type=str,
+        help=(
+            "What type of QA to perform. "
+            "One of `extractive`, `generative`."),
+        default="generative",
+        required=False
+    )
+
+    parser.add_argument(
+        "--num_return_docs",
+        type=int,
+        help=(
+            "The number of documents to return "
+            "(if `chain_type` is `extractive`)."),
+        default=4,
+        required=False
+    )
+
+    parser.add_argument(
+        "--return_threshold",
+        type=float,
+        help=(
+            "The confidence threshold in [0,1] to use as a cutoff "
+            "(if `chain_type` is `extractive`.)"),
+        default=0,
+        required=False
+    )
+
     args = parser.parse_args()
 
     run_cli_application(
+        chain_type=args.chain_type,
+        config_yaml=args.config_yaml,
         docs_dir=args.docs_dir,
-        config_yaml=args.config_yaml
+        num_return_docs=args.num_return_docs,
+        return_threshold=args.return_threshold
     )
