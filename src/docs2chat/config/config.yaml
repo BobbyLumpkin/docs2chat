@@ -18,7 +18,11 @@ MODEL_PATH: &MODEL_PATH
   !osjoin
     - *MODEL_DIR
     - llama-2-7b-chat.ggmlv3.q4_0.bin
-EMBEDDING_DIR: &EMBEDDING
+EMBEDDING_DIR: &EMBEDDING_DIR
   !osjoin
     - *MODELS_DIR
     - instructor-xl
+HS_EMBEDDING_DIR: &HS_EMBEDDING_DIR
+  !osjoin
+    - *MODEL_DIR
+    - "all-MiniLM-L6-v2"

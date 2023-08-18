@@ -11,6 +11,10 @@ from typing import Optional, Union
 
 
 from docs2chat.preprocessing import PreProcessor
+from docs2chat.extract.utils import (
+    _RankerReaderProtocol,
+    _HaystackRetrieverProtocol,
+)
 
 
 _logger = logging.getLogger(__name__)
@@ -24,11 +28,14 @@ _logger.addHandler(_console_handler)
 
 
 @dataclass
-class ExtractivePipeline:
+class SearchExtractivePipeline:
     
     content: InitVar[Optional[str]] = field(default=None)
     preprocessor: Optional[PreProcessor] = field(default=None)
     num_return_docs: int = field(default=4)
+    ranker: Optional[_RankerReaderProtocol] = field(default=None)
+    # reader: Optional[_RankerReaderProtocol] = field(default=None)
+    retriever: Optional[_HaystackRetrieverProtocol] = field(default=None)
     return_threshold: float = field(default=0)
 
     def __post_init__(self, content):
@@ -37,7 +44,10 @@ class ExtractivePipeline:
                 "PreProcessor was not passed. "
                 "Initializing a PreProcessor object."
             )
-            preprocessor = PreProcessor(content=content)
+            preprocessor = PreProcessor(
+                chain_type="extractive",
+                content=content
+            )
             setattr(self, "preprocessor", preprocessor)
         if not hasattr(self.preprocessor, "vectorstore"):
             _logger.info(
@@ -48,6 +58,16 @@ class ExtractivePipeline:
                 show_progress=False,
                 store_vectorstore=True
             )
+        if self.retriever is None:
+            _logger.info(
+                "Generating a HS Retriever."
+            )
+            retriever = EmbeddingRetriever(
+                document_store=self.preprocessor.vectorstore,
+                embedding_model=config.HS_EMBEDDING_DIR
+            )
+            setattr(self, "retriever", retriever)
+            self.preprocessor.vectorstore.update_embeddings(retriever)
     
     def __call__(self, query: str):
         return self.run(query=query)
