@@ -5,7 +5,7 @@ Langchain LLM pipeline for generative QA pipeline.
 
 from dataclasses import dataclass, field, InitVar
 from haystack.document_stores import FAISSDocumentStore
-from langchain.embeddings import HuggingFaceInstructEmbeddings
+from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.text_splitter import CharacterTextSplitter
 import logging
 from pathlib import Path
@@ -94,7 +94,7 @@ class ExtractivePreProcessor:
     ):
         _logger.info(
             "Loading documents into vectorstore. "
-            "This may take a few minutes ..."
+            "This may take a few mquitinutes ..."
         )
         docs = self.load_and_split(
             show_progress=show_progress,
@@ -145,7 +145,7 @@ class GenerativePreProcessor:
             _logger.info(
                 f"Loading embedding model from {config.EMBEDDING_DIR}."
             )
-            embeddings = HuggingFaceInstructEmbeddings(
+            embeddings = HuggingFaceEmbeddings(
                 model_name=config.EMBEDDING_DIR
             )
             setattr(self, "embeddings", embeddings)

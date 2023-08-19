@@ -21,11 +21,7 @@ MODEL_PATH: &MODEL_PATH
 EMBEDDING_DIR: &EMBEDDING_DIR
   !osjoin
     - *MODELS_DIR
-    - instructor-xl
-HS_EMBEDDING_DIR: &HS_EMBEDDING_DIR
-  !osjoin
-    - *MODELS_DIR
-    - "all-MiniLM-L6-v2"
+    - all-MiniLM-L6-v2
 HS_READER_DIR: &HS_READER_DIR
   !osjoin
     - *MODELS_DIR
