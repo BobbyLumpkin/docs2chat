@@ -2,6 +2,8 @@
 Purpose: Utilities for pipeline module.
 """
 
+
+from haystack.schema import Document as HS_Document
 from langchain.docstore.document import Document
 from langchain.document_loaders import DirectoryLoader
 from langchain.text_splitter import CharacterTextSplitter
@@ -91,3 +93,12 @@ def create_vectorstore(
     Create a FAISS vectorstore 
     """
     return FAISS.from_documents(documents=docs, embedding=embeddings)
+
+
+def langchain_to_haystack_docs(
+    docs: list[Document]
+) -> list[HS_Document]:
+    return [
+        HS_Document(content=doc.page_content, meta=doc.metadata)
+        for doc in docs
+    ]
