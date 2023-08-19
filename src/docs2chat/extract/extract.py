@@ -74,7 +74,7 @@ class SnipExtractivePipeline:
                 )
                 retriever = EmbeddingRetriever(
                     document_store=self.preprocessor.vectorstore,
-                    embedding_model=config.HS_EMBEDDING_DIR
+                    embedding_model=config.EMBEDDING_DIR
                 )
                 setattr(self, "retriever", retriever)
                 self.preprocessor.vectorstore.update_embeddings(retriever)
@@ -150,7 +150,7 @@ class SearchExtractivePipeline:
                 )
                 retriever = EmbeddingRetriever(
                     document_store=self.preprocessor.vectorstore,
-                    embedding_model=config.HS_EMBEDDING_DIR
+                    embedding_model=config.EMBEDDING_DIR
                 )
                 setattr(self, "retriever", retriever)
                 self.preprocessor.vectorstore.update_embeddings(retriever)

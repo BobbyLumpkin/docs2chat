@@ -26,7 +26,7 @@ _logger.addHandler(_console_handler)
 
 
 PROMPT_TEMPLATE = """You are a helpful AI assistant. Use the following pieces of context to answer the question at the end.
-Your answer should be thorough, helpful and accurate.
+Your answer should be concise, helpful and accurate.
 If you don't know the answer, just say 'I'm sorry, but I lack the information to assist with this'.
 Do not try to make up an answer.
 
