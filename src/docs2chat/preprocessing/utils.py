@@ -21,30 +21,12 @@ class _EmbeddingsProtocol(Protocol):
         ...
 
 
-class _HaystackRetrieverProtocol(Protocol):
-
-    def retrieve():
-        ...
-    
-    def retrieve_batch():
-        ...
-
-
 class _MemoryProtocol(Protocol):
     
     def save_context():
         ...
     
     def load_memory_variables():
-        ...
-
-
-class _RankerReaderProtocol(Protocol):
-
-    def predict():
-        ...
-    
-    def predict_batch():
         ...
 
 

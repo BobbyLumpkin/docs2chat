@@ -8,6 +8,7 @@ import logging
 import os
 import readline
 import sys
+from typing import Literal
 
 
 from docs2chat.apps.utils import ChainFactory, load_bool, load_none_or_str
@@ -39,7 +40,7 @@ BANNER = f"""
 
 
 def run_cli_application(
-    chain_type: str = "generative",
+    chain_type: Literal["generative", "search", "snip"] = "generative",
     config_yaml: str = None,
     docs_dir: str = None,
     num_return_docs: int = None,

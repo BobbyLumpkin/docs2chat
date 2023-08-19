@@ -4,6 +4,7 @@ Langchain LLM pipeline for generative QA pipeline.
 
 
 from dataclasses import dataclass, field, InitVar
+from haystack.document_stores import FAISSDocumentStore
 from langchain.embeddings import HuggingFaceInstructEmbeddings
 from langchain.text_splitter import CharacterTextSplitter
 import logging
@@ -65,7 +66,7 @@ class ExtractivePreProcessor:
             setattr(self, "text_splitter", text_splitter)
     
     def load_and_split(self, show_progress=True, store=False):
-        load_func = PreProcessor.LOADER_FACTORY[self.load_from_type]
+        load_func = ExtractivePreProcessor.LOADER_FACTORY[self.load_from_type]
         docs = langchain_to_haystack_docs(load_func(
             content=self.content,
             text_splitter=self.text_splitter,
@@ -89,17 +90,17 @@ class ExtractivePreProcessor:
         show_progress: bool = True,
         return_vectorstore: bool = True,
         store_docs: bool = False,
-        store_vectorstore: bool = False
+        store_vectorstore: bool = True
     ):
         _logger.info(
-            "Loading documents into vectorstore. This may take a few minutes ..."
+            "Loading documents into vectorstore. "
+            "This may take a few minutes ..."
         )
         docs = self.load_and_split(
             show_progress=show_progress,
             store=store_docs
         )
         vectorstore = self.create_vectorstore(
-            docs=docs,
             store=store_vectorstore
         )
         vectorstore.write_documents(docs)
@@ -150,7 +151,7 @@ class GenerativePreProcessor:
             setattr(self, "embeddings", embeddings)
     
     def load_and_split(self, show_progress=True, store=False):
-        load_func = PreProcessor.LOADER_FACTORY[self.load_from_type]
+        load_func = GenerativePreProcessor.LOADER_FACTORY[self.load_from_type]
         docs = load_func(
             content=self.content,
             text_splitter=self.text_splitter,
@@ -195,13 +196,14 @@ class GenerativePreProcessor:
 class PreProcessor:
 
     preprocessor_dict = {
-        "extractive": ExtractivePreProcessor,
+        "search": ExtractivePreProcessor,
+        "snip": ExtractivePreProcessor,
         "generative": GenerativePreProcessor
     }
 
     def __new__(
         cls,
-        chain_type: Literal["extractive", "generative"],
+        chain_type: Literal["search", "snip", "generative"],
         **kwargs
     ):
         preprocessor_cls = cls.preprocessor_dict[chain_type]

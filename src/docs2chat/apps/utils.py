@@ -28,8 +28,7 @@ class ChainFactory:
                 docs_dir=docs_dir,
                 config_obj=config_obj
             )
-            format_func = format_conversation_chain_output
-        elif chain_type == "extractive":
+        elif chain_type in ["search", "snip"]:
             for kwarg in [num_return_docs, return_threshold]:
                 if kwarg is None:
                     raise ValueError(
@@ -37,11 +36,17 @@ class ChainFactory:
                         f"`{kwarg}` must be provided!"
                     )
             chain = ExtractivePipeline(
+                chain_type=chain_type,
                 content=docs_dir,
                 num_return_docs=num_return_docs,
                 return_threshold=return_threshold
             )
-            format_func = format_extractive_pipeline_output
+        else:
+            raise ValueError(
+                "`chain_type` must be one of 'generative', "
+                "'search' or 'snip."
+            )
+        format_func = FORMAT_FUNC_FACTORY[chain_type]
         return (chain, format_func)
 
 
@@ -57,14 +62,32 @@ def format_conversation_chain_output(output):
     return
 
 
-def format_extractive_pipeline_output(output):
-    for idx, tup in enumerate(output):
+def format_search_pipeline_output(output):
+    for idx, doc in enumerate(output):
         print(
-            f"\nDocument {idx + 1} -- Score: {1 - tup[1]}\n"
-            f"Content: {tup[0].page_content}\n"
-            f"Source: {tup[0].metadata['source']}"
+            f"\nDocument {idx + 1} -- Score: {doc.score}\n"
+            f"Content: {doc.content}\n"
+            f"Source: {doc.meta['source']}"
         )
     return
+
+
+def format_snip_pipeline_output(output):
+    for idx, doc in enumerate(output):
+        print(
+            f"\nSnippet: {idx + 1} -- Score: {doc.score}\n"
+            f"Content: {doc.answer}\n"
+            f"content: {doc.context}\n"
+            f"Source: {doc.meta['source']}"
+        )
+    return
+
+
+FORMAT_FUNC_FACTORY = {
+    "generative": format_conversation_chain_output,
+    "search": format_search_pipeline_output,
+    "snip": format_snip_pipeline_output
+}
 
 
 def load_bool(value):

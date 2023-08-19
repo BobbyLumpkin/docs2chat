@@ -44,7 +44,7 @@ def get_conversation_chain(
     docs_dir: str,
     config_obj: Config = config,
 ) -> ConversationalRetrievalChain:
-    preprocessor = PreProcessor(content=docs_dir)
+    preprocessor = PreProcessor(chain_type="generative", content=docs_dir)
     vectorstore = preprocessor.preprocess(show_progress=False)
     _logger.info(
         f"Loading LLM from {config_obj.MODEL_PATH}."
