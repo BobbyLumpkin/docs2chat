@@ -1,6 +1,7 @@
 # Miscellaneous
-notebooks/
+docs/
 models/
+notebooks/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

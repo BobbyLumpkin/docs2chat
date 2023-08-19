@@ -94,7 +94,7 @@ class ExtractivePreProcessor:
     ):
         _logger.info(
             "Loading documents into vectorstore. "
-            "This may take a few mquitinutes ..."
+            "This may take a few minutes ..."
         )
         docs = self.load_and_split(
             show_progress=show_progress,
