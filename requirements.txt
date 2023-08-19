@@ -1,7 +1,9 @@
 faiss-cpu==1.7.4
+farm-haystack==1.19.0
 InstructorEmbedding==1.0.1
 langchain==0.0.247
 llama-cpp-python==0.1.77
 sentence_transformers==2.2.2
+sqlalchemy==1.4.49
 tqdm==4.65.0
 unstructured==0.8.7

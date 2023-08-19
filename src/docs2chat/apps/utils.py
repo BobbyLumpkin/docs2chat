@@ -77,7 +77,7 @@ def format_snip_pipeline_output(output):
         print(
             f"\nSnippet: {idx + 1} -- Score: {doc.score}\n"
             f"Content: {doc.answer}\n"
-            f"content: {doc.context}\n"
+            f"context: {doc.context}\n"
             f"Source: {doc.meta['source']}"
         )
     return
