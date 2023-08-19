@@ -84,7 +84,7 @@ class SnipExtractivePipeline:
                 )
                 reader = FARMReader(
                     model_name_or_path=config.HS_READER_DIR,
-                    use_gpu=False
+                    use_gpu=True
                 )
                 setattr(self, "reader", reader)
             _logger.info(
@@ -160,7 +160,7 @@ class SearchExtractivePipeline:
                 )
                 ranker = SentenceTransformersRanker(
                     model_name_or_path="cross-encoder/ms-marco-MiniLM-L-12-v2",
-                    use_gpu=False
+                    use_gpu=True
                 )
                 setattr(self, "ranker", ranker)
             _logger.info(

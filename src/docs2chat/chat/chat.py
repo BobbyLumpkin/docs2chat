@@ -56,7 +56,9 @@ def get_conversation_chain(
     )
     llm = LlamaCpp(
         model_path=config_obj.MODEL_PATH,
+        n_gpu_layers=40,
         n_ctx=2048,
+        n_batch=512,
         input={"temperature": 0.75, "max_length": 2000, "top_p": 1},
         verbose=False
     )
